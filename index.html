@@ -963,7 +963,7 @@ function rep4Text(g, s){ const ds = attDates(g, curDate).slice(-4); const es = d
   return t + `\n\nMr. Mahmoud Abolsaad | Math Cafe`; }
 
 function folderOf(g, s){ const k = (g.name + '|' + s.name).toLowerCase(); return (DB.folders && DB.folders[k]) || DEF_FOLDERS[k] || ''; }
-function folderMsg(s, url){ return `السلام عليكم ورحمة الله وبركاته\nده لينك فولدر ${s.boy ? 'الطالب' : 'الطالبة'} ${s.name} في الماث 📂\n${url}\n\nهتلاقوا فيه كل الورق المتصحح ونموذج الإجابة، وملف "كشف الدرجات" بيتحدّث تلقائي بعد كل تصحيح.\nاحتفظوا باللينك، هو ثابت ومش هيتغير 🙏\nMr. Mahmoud Abolsaad | Math Cafe`; }
+function folderMsg(s, url, g){ const f = g && FORMS[g.grade]; return `السلام عليكم ورحمة الله وبركاته\n${s.boy ? 'الطالب' : 'الطالبة'}: ${s.name}\n\n📂 لينك متابعة الورق المصحح والدرجات:\n${url}` + (f ? `\n\n📤 لينك رفع الواجب:\n${f}` : '') + `\n\nاحتفظوا باللينكات دي 🙏\nMr. Mahmoud Abolsaad | Math Cafe`; }
 let trTab = 'miss', r4i = 0;
 function trRender(){ const g = cur; $('#trG').textContent = g.name;
   document.querySelectorAll('#trTabs [data-tt]').forEach(b => b.classList.toggle('on', b.dataset.tt === trTab));
@@ -998,7 +998,7 @@ function trRender(){ const g = cur; $('#trG').textContent = g.name;
       <button class="btn" id="r4Done" style="width:100%;margin-top:8px">✔ خلصت تقارير الجروب (ابدأ عدّ 4 حصص جديدة)</button>` : ''); }
   if (trTab === 'fold') { const rows = g.students.map(s => ({s, u: folderOf(g, s)}));
     h = `<p class="hint">لينك ثابت لكل طالب، فيه ورقه المتصحح وكشف الدرجات. ابعته لولي الأمر مرة واحدة.</p>` + rows.map(({s, u}) => `<div class="erow" style="grid-template-columns:1fr auto auto;padding:6px 0;border-bottom:1px solid var(--line)"><b dir="ltr">${esc(s.name)}</b>` +
-      (u ? `<a class="btn" target="_blank" href="${esc(u)}">افتح</a><a class="btn wa" target="_blank" href="${esc(waTo(s.phone, folderMsg(s, u)))}">ابعت لولي الأمر</a>` : `<span class="hint" style="grid-column:span 2">لسه متعملش فولدر</span>`) + `</div>`).join(''); }
+      (u ? `<a class="btn" target="_blank" href="${esc(u)}">افتح</a><a class="btn wa" target="_blank" href="${esc(waTo(s.phone, folderMsg(s, u, g)))}">ابعت لولي الأمر</a>` : `<span class="hint" style="grid-column:span 2">لسه متعملش فولدر</span>`) + `</div>`).join(''); }
   $('#trBody').innerHTML = h;
   if (trTab === 'rep4' && $('#r4Text')) { const upd = () => $('#r4Wa').href = waTo(g.students[r4i].phone, $('#r4Text').value); upd(); $('#r4Text').addEventListener('input', upd); }
 }
@@ -1039,7 +1039,7 @@ function openStu(s){ if (!s) return; stuS = s; const g = cur; $('#stuT').innerHT
     `<h4 style="margin:6px 0">📈 مستواه</h4>${chartSVG(scorePts(g, s))}
     <h4 style="margin:14px 0 6px">🗂 ورقه المتصحح (${papers.length})</h4>` + (papers.length ? papers.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px">
       <span><b dir="ltr">${esc(x.t)}</b> <span dir="ltr" style="color:var(--muted)">${esc(x.sc)}</span></span><span style="white-space:nowrap">${x.p ? `<a class="btn" target="_blank" href="${esc(x.p)}">الورقة</a>` : ''}${x.a ? ` <a class="btn" target="_blank" href="${esc(x.a)}">النموذج</a>` : ''}</span></div>`).join('') : '<p class="hint">لسه مفيش ورق متصحح.</p>') +
-    (folderOf(g, s) ? `<h4 style="margin:14px 0 6px">📂 فولدر ولي الأمر</h4><div style="display:flex;gap:8px"><a class="btn" target="_blank" href="${esc(folderOf(g, s))}" style="flex:1;text-align:center">افتح الفولدر</a><a class="btn wa" target="_blank" href="${esc(waTo(s.phone, folderMsg(s, folderOf(g, s))))}" style="flex:1;text-align:center">ابعت اللينك لولي الأمر</a></div>` : '') +
+    (folderOf(g, s) ? `<h4 style="margin:14px 0 6px">📂 فولدر ولي الأمر</h4><div style="display:flex;gap:8px"><a class="btn" target="_blank" href="${esc(folderOf(g, s))}" style="flex:1;text-align:center">افتح الفولدر</a><a class="btn wa" target="_blank" href="${esc(waTo(s.phone, folderMsg(s, folderOf(g, s), g)))}" style="flex:1;text-align:center">ابعت اللينك لولي الأمر</a></div>` : '') +
     `<h4 style="margin:14px 0 6px">📝 تقرير آخر 4 حصص</h4><textarea id="stuR4" style="width:100%;min-height:180px;font-size:13px">${esc(rep4Text(g, s))}</textarea><a class="btn wa" id="stuR4Wa" target="_blank" style="display:block;text-align:center;margin-top:6px">ابعت لولي الأمر</a>
     <h4 style="margin:14px 0 6px">🔀 نقل لجروب تاني</h4><p class="hint">كل حاجة بتتنقل معاه: الحضور والواجبات والدرجات والورق والأرقام.</p>
     <div style="display:flex;gap:8px"><select id="mvTo" style="flex:1">${others.map(x => `<option value="${x.id}">${esc(x.name)} · ${esc(GRADE_AR[x.grade] || x.grade)}</option>`).join('')}</select><button class="btn primary" id="mvGo">انقل</button></div>`;
